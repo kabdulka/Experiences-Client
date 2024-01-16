@@ -1,14 +1,14 @@
 import { createSlice } from '@reduxjs/toolkit';
 
-import { getPosts } from '../../api/fetchPosts';
+import { getPosts } from '../../api';
 
-export interface PostType {
+export interface PostsData {
     data: null | []
     loading: boolean
     error: string | null
 }
 
-const initialState: PostType = {
+const initialState: PostsData = {
     data: [],
     loading: false,
     error: ""

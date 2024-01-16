@@ -6,7 +6,7 @@ import experiences from './images/experiences.jpeg'
 import Posts from './components/Posts/Posts';
 import Form from './components/Form/Form';
 import { StyledAppBar, imgStyle, headingStyle } from './styles';
-import { getPosts } from './api/fetchPosts';
+import { getPosts } from './api';
 import { useAppDispatch } from './redux/hooks';
 import { useEffect } from 'react';
 

@@ -1,16 +1,20 @@
-import { TextField, Button, Typography, Paper, Theme, useTheme } from "@mui/material";
+import { TextField, Button, Typography, Paper } from "@mui/material";
 import FormStyles from "./styles";
 import './form.scss'
 import CloseIcon from '@mui/icons-material/Close';
 import AttachFileIcon from '@mui/icons-material/AttachFile';
 import { useState, useCallback } from "react";
 import {useDropzone} from 'react-dropzone'
+import { useAppDispatch } from "../../redux/hooks";
+import { createPost } from "../../api";
+import { postType } from "../../types/post";
 
 const Form: React.FC = () => {
+
     const [preview, setPreview] = useState<string>("");
     const [attachment, setAttachment] = useState<File | string | undefined>();
     // convert image to base 64 string
-    const [postData, setPostData] = useState({
+    const [postData, setPostData] = useState<postType>({
         postOwner: '',
         title: '',
         message: '',
@@ -18,6 +22,8 @@ const Form: React.FC = () => {
         selectedFile: '',
 
     });
+
+    const dispatch = useAppDispatch();
 
     const onDrop = useCallback ((acceptedFiles: FileList) => {
 
@@ -54,12 +60,49 @@ const Form: React.FC = () => {
         console.log(postData);
     }
 
-    const handleSubmit = () => {
-        // Handle submit logic
-    }
+    const handleSubmit = async (e: SubmitEvent) => {
+        // TODO 
+        // Work on error handling later
+        e.preventDefault();
+        console.log("here")
+        const keys = Object.keys(postData) as Array<keyof typeof postData>;
+        keys.forEach((key) => {
+            console.log(keys)
+            if (!postData[key]) {
+                console.log(postData[key], " is not filled")
+                return false
+            }
+        })
+       
+        try {
+          await dispatch(createPost(postData));
+          // Additional logic after successful post creation, if needed
+        } catch (error) {
+          console.error("Error creating post:", error);
+          // Handle error, show message to the user, etc.
+        }
+      };
 
     const handleClear = (e: SubmitEvent) => {
         e.preventDefault();
+        setPostData({
+            postOwner: "",
+            title: "",
+            message: "",
+            tags: "",
+            selectedFile: ""
+        })
+    }
+
+    // const handleClearHelper = (input: postType) => {
+    //     const keys = Object.keys(input) as Array<keyof typeof input>;
+    //     keys.forEach((key) => {
+    //         input[key] = ""
+    //     })
+    // }
+
+    const handleInputError = () => {
+        return true;
     }
 
     return (
@@ -72,9 +115,9 @@ const Form: React.FC = () => {
                     Creating an Experience
                 </Typography>
                 <TextField  
-                    name="owner" 
+                    name="postOwner" 
                     variant="outlined" 
-                    label="owner" 
+                    label="post owner" 
                     fullWidth
                     value={postData.postOwner}
                     onChange={handleTextChange}
@@ -149,18 +192,16 @@ const Form: React.FC = () => {
                     fullWidth
                     size="large"
                     // style={{"marginBottom": 10}}
-                    onClick={handleSubmit}
                 >
                     Submit
                 </Button>
                 <Button
                     variant="contained"
-                    type="submit"
                     color="secondary"
                     fullWidth
                     size="large"
 
-                    onClick={(e: SubmitEvent) => handleClear(e)}
+                    onClick={handleClear}
                 >
                     Clear
                 </Button>
