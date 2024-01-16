@@ -5,11 +5,21 @@ import { Container, Typography, Grow, Grid } from '@mui/material';
 import experiences from './images/experiences.jpeg'
 import Posts from './components/Posts/Posts';
 import Form from './components/Form/Form';
-// import { styled } from '@mui/material/styles';
-// import { styled } from '@mui/system';
 import { StyledAppBar, imgStyle, headingStyle } from './styles';
+import { getPosts } from './api/fetchPosts';
+import { useAppDispatch } from './redux/hooks';
+import { useEffect } from 'react';
+
 
 const App: React.FC = () => {
+
+  const dispatch = useAppDispatch();
+  // const posts = useAppSelector(state => state.posts.data);
+
+  useEffect(() => {
+    dispatch(getPosts())
+  }, [dispatch])
+  // console.log(posts)
 
   return (
     <Container maxWidth="lg">
@@ -23,7 +33,7 @@ const App: React.FC = () => {
             <Grid item xs={12} sm={7}>  
               <Posts />
             </Grid>
-            <Grid item xs={12} sm={4}>  
+            <Grid item xs={12} sm={5}>  
               <Form />
             </Grid>
           </Grid>
