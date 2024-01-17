@@ -1,9 +1,9 @@
 import { createSlice } from '@reduxjs/toolkit';
-
+import { PostType } from '../../types/post';
 import { getPosts } from '../../api';
 
 export interface PostsData {
-    data: null | []
+    data: null | PostType[]
     loading: boolean
     error: string | null
 }
@@ -25,7 +25,8 @@ export const postsSlice = createSlice({
         })
         .addCase(getPosts.fulfilled, (state, action) => {
             state.loading = false
-            state.data = action.payload
+            // state.data = action.payload
+            state.data = [...action.payload];
             state.error = null
         })
         .addCase(getPosts.rejected, (state, action) => {

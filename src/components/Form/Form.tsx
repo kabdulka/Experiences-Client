@@ -1,48 +1,48 @@
-import { TextField, Button, Typography, Paper } from "@mui/material";
-import FormStyles from "./styles";
+import { TextField, Button, Typography, Paper, CircularProgress } from "@mui/material";
 import './form.scss'
 import CloseIcon from '@mui/icons-material/Close';
 import AttachFileIcon from '@mui/icons-material/AttachFile';
 import { useState, useCallback } from "react";
 import {useDropzone} from 'react-dropzone'
 import { useAppDispatch } from "../../redux/hooks";
-import { createPost } from "../../api";
-import { postType } from "../../types/post";
+import { createPost, getPosts } from "../../api";
+import { FormPostType } from "../../types/post";
 
 const Form: React.FC = () => {
-
+    // TODO: add preview for the upload image feature (not dropzone)
     const [preview, setPreview] = useState<string>("");
-    const [attachment, setAttachment] = useState<File | string | undefined>();
-    // convert image to base 64 string
-    const [postData, setPostData] = useState<postType>({
-        postOwner: '',
+    const [loading, setLoading] = useState<boolean>(false);
+    // const [attachment, setAttachment] = useState<File | string | undefined>();
+    const [postData, setPostData] = useState({
+        user: '',
         title: '',
         message: '',
         tags: '',
-        selectedFile: '',
-
+        file: null,
     });
 
     const dispatch = useAppDispatch();
 
-    const onDrop = useCallback ((acceptedFiles: FileList) => {
+    const onDrop = useCallback ((acceptedFiles: File[]) => {
 
         if (acceptedFiles.length > 0) {
             const file = acceptedFiles[0];
             console.log(acceptedFiles);
-            setAttachment(file);
+            setPostData({...postData, file: file})
+            // setAttachment(file);
 
             // create a preview URL for the dropped file
             const previewURL = URL.createObjectURL(file);
             setPreview(previewURL);
         }
-    }, [setAttachment]);
+    }, [postData]);
 
     const {getRootProps, getInputProps, open, isDragActive} = useDropzone({
         accept: '.jpeg, .jpg, .png',
         multiple: false,
         noClick: true,
-        onDrop: onDrop
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        onDrop: onDrop as any
     });
 
     const formStyles: React.CSSProperties = {
@@ -60,66 +60,70 @@ const Form: React.FC = () => {
         console.log(postData);
     }
 
-    const handleSubmit = async (e: SubmitEvent) => {
+    const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         // TODO 
         // Work on error handling later
         e.preventDefault();
-        console.log("here")
-        const keys = Object.keys(postData) as Array<keyof typeof postData>;
-        keys.forEach((key) => {
-            console.log(keys)
-            if (!postData[key]) {
-                console.log(postData[key], " is not filled")
-                return false
-            }
-        })
        
         try {
-          await dispatch(createPost(postData));
-          // Additional logic after successful post creation, if needed
+            setLoading(true);        
+            await dispatch(createPost(postData));
+            await dispatch(getPosts());
+
+            // Reset Form
+            setPostData({
+                user: "",
+                title: "",
+                message: "",
+                tags: "",
+                file: null
+            })
         } catch (error) {
           console.error("Error creating post:", error);
           // Handle error, show message to the user, etc.
+        } finally {
+            setLoading(false);
         }
       };
 
-    const handleClear = (e: SubmitEvent) => {
+    const handleClear = (e: React.MouseEvent<HTMLButtonElement>) => {
         e.preventDefault();
         setPostData({
-            postOwner: "",
+            user: "",
             title: "",
             message: "",
             tags: "",
-            selectedFile: ""
+            file: null
         })
     }
 
-    // const handleClearHelper = (input: postType) => {
-    //     const keys = Object.keys(input) as Array<keyof typeof input>;
-    //     keys.forEach((key) => {
-    //         input[key] = ""
-    //     })
-    // }
-
-    const handleInputError = () => {
-        return true;
-    }
+    const handleFileChange = (e) => {
+        const reader = new FileReader
+        reader.readAsDataURL(e.target.files[0])
+        reader.onload = () => {
+            // setPostData({...postData, file: e.target.files[0]});
+            setPostData({...postData, file: reader.result});
+        }
+        reader.onerror = error => {
+            console.log("Error", error)
+        }
+    };
 
     return (
         <Paper sx={(theme => ({
             padding: theme.spacing(2),
         }))} className="">
             {/* TODO fix spacing */}
-            <form autoComplete="off" noValidate style={formStyles} onSubmit={handleSubmit}>
+            <form autoComplete="off" noValidate style={formStyles} onSubmit={handleSubmit} encType="multipart/form-data" action="/upload">
                 <Typography className="" variant="h6">
                     Creating an Experience
                 </Typography>
                 <TextField  
-                    name="postOwner" 
+                    name="user" 
                     variant="outlined" 
-                    label="post owner" 
+                    label="user" 
                     fullWidth
-                    value={postData.postOwner}
+                    value={postData.user}
                     onChange={handleTextChange}
                 />
                 <TextField  
@@ -146,6 +150,8 @@ const Form: React.FC = () => {
                     value={postData.tags}
                     onChange={handleTextChange}
                 />
+                <input style={{width: "100%"}} type="file" accept="image/*" onChange={handleFileChange} />
+
                 {/* <div> */}
                     {
                         preview && (
@@ -160,7 +166,7 @@ const Form: React.FC = () => {
                                     className="message-form-icon-x"
                                     onClick={() => {
                                         setPreview("");
-                                        setAttachment("");
+                                        // setAttachment("");
                                     }}
                                 />
                             </div>
@@ -169,7 +175,7 @@ const Form: React.FC = () => {
                     <div className="message-form-icons">
                 
                         <div {...getRootProps()}>              
-                            <input {...getInputProps()}/>
+                            <input {...getInputProps()} type="file" name="file" onChange={handleFileChange}/>
                             <div className="dropzone-content__container">
 
                             <AttachFileIcon
@@ -185,13 +191,13 @@ const Form: React.FC = () => {
                         </div>
                     </div>
                 {/* </div> */}
+                {loading && <CircularProgress />}
                 <Button
                     variant="contained"
                     type="submit"
                     color="primary"
                     fullWidth
                     size="large"
-                    // style={{"marginBottom": 10}}
                 >
                     Submit
                 </Button>
@@ -200,7 +206,6 @@ const Form: React.FC = () => {
                     color="secondary"
                     fullWidth
                     size="large"
-
                     onClick={handleClear}
                 >
                     Clear

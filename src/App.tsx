@@ -24,7 +24,7 @@ const App: React.FC = () => {
   return (
     <Container maxWidth="lg">
       <StyledAppBar position='static' color="inherit" >
-        <Typography style={headingStyle} variant='h2' align='center'> Memories </Typography>
+        <Typography style={headingStyle} variant='h2' align='center'> Experiences </Typography>
         <img style={imgStyle} src={experiences} alt="Experiences" height="60"/>
       </StyledAppBar>
       <Grow in>
