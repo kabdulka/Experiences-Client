@@ -1,8 +1,14 @@
 import axios from 'axios';
 import { createAsyncThunk } from '@reduxjs/toolkit';
-import { FormPostType, PostType } from '../types/post';
+import { FormPostType } from '../types/post';
 
 const url = `http://localhost:5500/posts`;
+
+interface UpdatePostPayload {
+    updateData: FormPostType;
+    id: string;
+}
+
 
 const getPosts = createAsyncThunk("posts/getPosts", async () => {
     try {
@@ -45,8 +51,31 @@ const createPost = createAsyncThunk("posts/sendPost",
 //     }
 // })
 
+const updatePost = createAsyncThunk("post/updatePost", 
+    async ({updateData, id}: UpdatePostPayload) => {
+    try {
+        const response = await axios.patch(`${url}/${id}`, updateData);
+        return response.data
+    } catch (error) {
+        console.log(error)
+    }
+})
+
+const deletePost = createAsyncThunk("post/deletePost", 
+    async (id: string) => {
+        try {
+            const response = await axios.delete(`${url}/${id}`);
+            return response.data;
+        } catch (error) {
+            console.log(error)
+        }
+    }
+)
+
 export {
     getPosts,
     createPost,
+    updatePost,
+    deletePost
 }
 

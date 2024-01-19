@@ -1,49 +1,58 @@
 import { TextField, Button, Typography, Paper, CircularProgress } from "@mui/material";
 import './form.scss'
 import CloseIcon from '@mui/icons-material/Close';
-import AttachFileIcon from '@mui/icons-material/AttachFile';
-import { useState, useCallback } from "react";
-import {useDropzone} from 'react-dropzone'
-import { useAppDispatch } from "../../redux/hooks";
-import { createPost, getPosts } from "../../api";
-import { FormPostType } from "../../types/post";
+// import AttachFileIcon from '@mui/icons-material/AttachFile';
+import { useState, useEffect } from "react";
+// import {useDropzone} from 'react-dropzone'
+import { useAppDispatch, useAppSelector } from "../../redux/hooks";
+import { updatePost, createPost, getPosts } from "../../api";
+// import { FormPostType } from "../../types/post";
+import { setCurrentPostId } from "../../redux/post/postSlice";
 
-const Form: React.FC = () => {
+const Form: React.FC= () => {
     // TODO: add preview for the upload image feature (not dropzone)
-    const [preview, setPreview] = useState<string>("");
+    const [preview, setPreview] = useState("");
     const [loading, setLoading] = useState<boolean>(false);
+    const dispatch = useAppDispatch();
+    const currentId = useAppSelector(state => state.postsReducer.currentPostId);
+    const post = useAppSelector((state) => currentId ? state.postsReducer.data.find((p) => p._id === currentId) : null);
     // const [attachment, setAttachment] = useState<File | string | undefined>();
     const [postData, setPostData] = useState({
         user: '',
         title: '',
         message: '',
-        tags: '',
+        tags: [""],
         file: null,
     });
 
-    const dispatch = useAppDispatch();
+    console.log(currentId, " Form.tsx");
 
-    const onDrop = useCallback ((acceptedFiles: File[]) => {
-
-        if (acceptedFiles.length > 0) {
-            const file = acceptedFiles[0];
-            console.log(acceptedFiles);
-            setPostData({...postData, file: file})
-            // setAttachment(file);
-
-            // create a preview URL for the dropped file
-            const previewURL = URL.createObjectURL(file);
-            setPreview(previewURL);
+    useEffect(() => {
+        if (post) {
+            setPostData(post);
         }
-    }, [postData]);
+    }, [post])
 
-    const {getRootProps, getInputProps, open, isDragActive} = useDropzone({
-        accept: '.jpeg, .jpg, .png',
-        multiple: false,
-        noClick: true,
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        onDrop: onDrop as any
-    });
+    // const onDrop = useCallback ((acceptedFiles: File[]) => {
+
+    //     if (acceptedFiles.length > 0) {
+    //         const file = acceptedFiles[0];
+    //         console.log(acceptedFiles);
+    //         setPostData({...postData, file: file})
+
+    //         // create a preview URL for the dropped file
+    //         const previewURL = URL.createObjectURL(file);
+    //         setPreview(previewURL);
+    //     }
+    // }, [postData]);
+
+    // const {getRootProps, getInputProps, open, isDragActive} = useDropzone({
+    //     // accept: '.jpeg, .jpg, .png',
+    //     multiple: false,
+    //     noClick: true,
+    //     // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    //     onDrop: onDrop as any
+    // });
 
     const formStyles: React.CSSProperties = {
         display: 'flex',
@@ -56,7 +65,17 @@ const Form: React.FC = () => {
 
     const handleTextChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const name = e.target.name
-        setPostData({...postData, [name]: e.target.value})
+        if (name === "tags") {
+            // TODO fix comma issue
+            // Ex, tag1,tag2,tag3 => #tag1 #tag2 tag3 (this is good)
+            // But, tag1, tag2, tag3 => #tag1 # tag2 # tag3
+            // console.log(e.target.value)
+            setPostData({...postData, [name]: e.target.value.split(",")})
+            // console.log("tags")
+        } else {
+
+            setPostData({...postData, [name]: e.target.value})
+        }
         console.log(postData);
     }
 
@@ -67,17 +86,16 @@ const Form: React.FC = () => {
        
         try {
             setLoading(true);        
-            await dispatch(createPost(postData));
+            if (!currentId) {
+                await dispatch(createPost(postData));
+            } else {
+                await dispatch(updatePost({updateData: postData, id: currentId}));
+            }
             await dispatch(getPosts());
 
             // Reset Form
-            setPostData({
-                user: "",
-                title: "",
-                message: "",
-                tags: "",
-                file: null
-            })
+            clear();
+
         } catch (error) {
           console.error("Error creating post:", error);
           // Handle error, show message to the user, etc.
@@ -88,21 +106,29 @@ const Form: React.FC = () => {
 
     const handleClear = (e: React.MouseEvent<HTMLButtonElement>) => {
         e.preventDefault();
+        clear();
+    }
+
+    const clear = (): void => {
+        dispatch(setCurrentPostId(null))
         setPostData({
             user: "",
             title: "",
             message: "",
-            tags: "",
+            tags: [""],
             file: null
         })
+        setPreview(null);
     }
 
     const handleFileChange = (e) => {
-        const reader = new FileReader
+        const reader = new FileReader()
         reader.readAsDataURL(e.target.files[0])
         reader.onload = () => {
-            // setPostData({...postData, file: e.target.files[0]});
-            setPostData({...postData, file: reader.result});
+            if (typeof reader.result === 'string') {
+                setPostData({ ...postData, file: reader.result });
+                setPreview(reader.result);
+            }
         }
         reader.onerror = error => {
             console.log("Error", error)
@@ -116,7 +142,9 @@ const Form: React.FC = () => {
             {/* TODO fix spacing */}
             <form autoComplete="off" noValidate style={formStyles} onSubmit={handleSubmit} encType="multipart/form-data" action="/upload">
                 <Typography className="" variant="h6">
-                    Creating an Experience
+                    {
+                        currentId ? `Editing ` : `Creating `
+                    } an Experience
                 </Typography>
                 <TextField  
                     name="user" 
@@ -150,6 +178,7 @@ const Form: React.FC = () => {
                     value={postData.tags}
                     onChange={handleTextChange}
                 />
+                {/* TODO make input show preview */}
                 <input style={{width: "100%"}} type="file" accept="image/*" onChange={handleFileChange} />
 
                 {/* <div> */}
@@ -166,13 +195,12 @@ const Form: React.FC = () => {
                                     className="message-form-icon-x"
                                     onClick={() => {
                                         setPreview("");
-                                        // setAttachment("");
                                     }}
                                 />
                             </div>
                         )
                     }
-                    <div className="message-form-icons">
+                    {/* <div className="message-form-icons">
                 
                         <div {...getRootProps()}>              
                             <input {...getInputProps()} type="file" name="file" onChange={handleFileChange}/>
@@ -189,7 +217,7 @@ const Form: React.FC = () => {
                             }        
                             </div>
                         </div>
-                    </div>
+                    </div> */}
                 {/* </div> */}
                 {loading && <CircularProgress />}
                 <Button

@@ -4,7 +4,7 @@ type FormPostType = {
     user: string,
     title: string,
     message: string,
-    tags: string,
+    tags: string[],
     file:  File | string | undefined,
 }
 

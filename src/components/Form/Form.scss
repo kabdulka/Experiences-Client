@@ -12,4 +12,15 @@
 
 .message-form-preview {
     // border: gray 1px solid;
+    width: 100%;
+}
+
+.message-form-icon-x {
+    transform: rotate(0deg) scale(1);
+
+    &:hover {
+        cursor: pointer;
+        transform: rotate(180deg) scale(1.25);
+        transition: transform 0.5s ease-out;
+    }
 }

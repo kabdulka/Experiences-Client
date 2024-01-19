@@ -4,6 +4,9 @@ import DeleteIcon from '@mui/icons-material/Delete';
 import MoreHorizIcon from '@mui/icons-material/MoreHoriz';
 import moment from "moment";
 import { PostType } from "../../../types/post";
+import { useAppDispatch } from "../../../redux/hooks";
+import { setCurrentPostId } from "../../../redux/post/postSlice";
+import { deletePost, getPosts, updatePost } from "../../../api";
 
 interface PostProps {
     post: PostType
@@ -11,7 +14,9 @@ interface PostProps {
 
 const Post: React.FC<PostProps> = ({post}) => {
 
-    console.log(post.file)
+    // console.log(post.file)
+
+    const dispatch = useAppDispatch();
 
     const media = {
         height: 0,
@@ -57,7 +62,22 @@ const Post: React.FC<PostProps> = ({post}) => {
         padding: '0 16px 8px 16px',
         display: 'flex',
         justifyContent: 'space-between',
-      }
+    }
+
+    const handleEditPost = () => {
+        dispatch(setCurrentPostId(post._id))
+    }
+
+    const handleLike = async () => {
+        await dispatch(updatePost({updateData: post, id: post._id}));
+
+    }
+
+    const handleDelete = async () => {
+        await dispatch(deletePost(post._id))
+        await dispatch(getPosts());
+    }
+
 
     return (
         <>
@@ -68,33 +88,33 @@ const Post: React.FC<PostProps> = ({post}) => {
                     <Typography variant="body2"> {moment(post.createdAt).fromNow()} </Typography>
                 </div>
                 <div style={overlay2}>
-                    <Button style={{color: "white"}} size="small" onClick={() => {}} > 
+                    <Button style={{color: "white"}} size="small" onClick={handleEditPost} > 
                         <MoreHorizIcon sx={{fontSize: "default"}} />
                     </Button>
                 </div>
                 <div style={details}>
                     <Typography variant="body2" color="textSecondary"> 
                         {
-                            post.tags.map((tag) => `#${tag} `)
+                            post.tags.map((tag) =>  `#${tag} `)
                         }
                     </Typography>
                 </div>
+                <Typography sx={title} variant="h5" gutterBottom> { post.title } </Typography>
                 <CardContent>
-                    <Typography sx={title} variant="h5" gutterBottom> { post.message } </Typography>
+                    <Typography variant="body2" color="textSecondary" component="p"> { post.message } </Typography>
                 </CardContent>
                 <CardActions sx={cardActions}>
-                        <Button size="small" color="primary" onClick={() => {}}>
-                            <ThumbsUpIcon fontSize="small"/>
-                            Like
-                            {post.likeCount}
-                        </Button>
-                        <Button size="small" color="primary" onClick={() => {}}>
-                            <DeleteIcon fontSize="small"/>
-                            Delete
-                        </Button>
+                    <Button size="small" color="primary" onClick={handleLike}>
+                        <ThumbsUpIcon fontSize="small"/>
+                        Like
+                        {post.likeCount}
+                    </Button>
+                    <Button size="small" color="primary" onClick={handleDelete}>
+                        <DeleteIcon fontSize="small"/>
+                        Delete
+                    </Button>
                 </CardActions>
             </Card>
-            {/* <img src={post.file}/> */}
         </>
     );
 };

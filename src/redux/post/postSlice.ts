@@ -4,12 +4,14 @@ import { getPosts } from '../../api';
 
 export interface PostsData {
     data: null | PostType[]
+    currentPostId: string | null
     loading: boolean
     error: string | null
 }
 
 const initialState: PostsData = {
     data: [],
+    currentPostId: null,
     loading: false,
     error: ""
 }
@@ -17,7 +19,11 @@ const initialState: PostsData = {
 export const postsSlice = createSlice({
     name: "posts",
     initialState,
-    reducers: {},
+    reducers: {
+        setCurrentPostId: (state, action) => {
+            state.currentPostId = action.payload
+        },
+    },
     extraReducers(builder) {
         builder
         .addCase(getPosts.pending, (state) => {
@@ -37,4 +43,5 @@ export const postsSlice = createSlice({
     }
 })
 
+export const { setCurrentPostId } = postsSlice.actions;
 export default postsSlice.reducer

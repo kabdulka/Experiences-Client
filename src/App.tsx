@@ -10,11 +10,10 @@ import { getPosts } from './api';
 import { useAppDispatch } from './redux/hooks';
 import { useEffect } from 'react';
 
-
 const App: React.FC = () => {
 
   const dispatch = useAppDispatch();
-  // const posts = useAppSelector(state => state.posts.data);
+  // const currentId = useAppSelector(state => state.postsReducer.currentPostId);
 
   useEffect(() => {
     dispatch(getPosts())
