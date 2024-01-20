@@ -6,7 +6,7 @@ import moment from "moment";
 import { PostType } from "../../../types/post";
 import { useAppDispatch } from "../../../redux/hooks";
 import { setCurrentPostId } from "../../../redux/post/postSlice";
-import { deletePost, getPosts, updatePost } from "../../../api";
+import { deletePost, getPosts, likePost } from "../../../api";
 
 interface PostProps {
     post: PostType
@@ -65,16 +65,16 @@ const Post: React.FC<PostProps> = ({post}) => {
     }
 
     const handleEditPost = () => {
-        dispatch(setCurrentPostId(post._id))
+        dispatch(setCurrentPostId(post._id));
     }
 
     const handleLike = async () => {
-        await dispatch(updatePost({updateData: post, id: post._id}));
-
+        await dispatch(likePost(post._id));
+        await dispatch(getPosts());
     }
 
     const handleDelete = async () => {
-        await dispatch(deletePost(post._id))
+        await dispatch(deletePost(post._id));
         await dispatch(getPosts());
     }
 
@@ -95,7 +95,7 @@ const Post: React.FC<PostProps> = ({post}) => {
                 <div style={details}>
                     <Typography variant="body2" color="textSecondary"> 
                         {
-                            post.tags.map((tag) =>  `#${tag} `)
+                            post.tags.filter((tag) =>  tag !== '').map(tag => `#${tag} `)
                         }
                     </Typography>
                 </div>
@@ -106,8 +106,8 @@ const Post: React.FC<PostProps> = ({post}) => {
                 <CardActions sx={cardActions}>
                     <Button size="small" color="primary" onClick={handleLike}>
                         <ThumbsUpIcon fontSize="small"/>
-                        Like
-                        {post.likeCount}
+                         &nbsp;
+                        {` Like ${post.likeCount} `}
                     </Button>
                     <Button size="small" color="primary" onClick={handleDelete}>
                         <DeleteIcon fontSize="small"/>

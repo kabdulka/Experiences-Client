@@ -72,10 +72,22 @@ const deletePost = createAsyncThunk("post/deletePost",
     }
 )
 
+const likePost = createAsyncThunk("post/likePost", 
+    async (id: string) => {
+        try {
+            const response = await axios.patch(`${url}/${id}/like`);
+            return response.data;
+        } catch (error) {
+            console.log(error);
+        }
+    }
+)
+
 export {
     getPosts,
     createPost,
     updatePost,
-    deletePost
+    deletePost,
+    likePost,
 }
 

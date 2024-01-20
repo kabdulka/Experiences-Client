@@ -66,11 +66,11 @@ const Form: React.FC= () => {
     const handleTextChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const name = e.target.name
         if (name === "tags") {
-            // TODO fix comma issue
-            // Ex, tag1,tag2,tag3 => #tag1 #tag2 tag3 (this is good)
-            // But, tag1, tag2, tag3 => #tag1 # tag2 # tag3
-            // console.log(e.target.value)
-            setPostData({...postData, [name]: e.target.value.split(",")})
+            
+            const trimmedTags = e.target.value.trim().split(",");
+
+            
+            setPostData({...postData, [name]: trimmedTags})
             // console.log("tags")
         } else {
 
