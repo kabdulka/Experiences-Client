@@ -1,6 +1,7 @@
 import axios from 'axios';
 import { createAsyncThunk } from '@reduxjs/toolkit';
 import { FormPostType } from '../types/post';
+import { History } from '@remix-run/router';
 
 const url = `http://localhost:5500/posts`;
 
@@ -9,6 +10,23 @@ interface UpdatePostPayload {
     id: string;
 }
 
+type formDataType = {
+    firstName: string,
+    lastName: string,
+    email: string,
+    password: string,
+    confirmPassword: string,
+}
+
+interface signIn {
+    history: History
+    formData: formDataType
+}
+
+interface signUp {
+    history: History
+    formData: formDataType
+}
 
 const getPosts = createAsyncThunk("posts/getPosts", async () => {
     try {
@@ -83,11 +101,37 @@ const likePost = createAsyncThunk("post/likePost",
     }
 )
 
+const signIn = createAsyncThunk("auth/signin", 
+    async ({formData, history}: signIn) => {
+        try {
+            //
+            history.push("/")
+        } catch (error) {
+            //
+            console.log(error)
+        }
+    }
+)
+
+const signUp = createAsyncThunk("auth/signup", 
+    async ({formData, history}: signUp) => {
+        try {
+            //
+            history.push("/")
+        } catch (error) {
+            //
+            console.log(error);
+        }
+    }
+)
+
 export {
     getPosts,
     createPost,
     updatePost,
     deletePost,
     likePost,
+    signIn,
+    signUp,
 }
 

@@ -138,7 +138,7 @@ const Form: React.FC= () => {
     return (
         <Paper sx={(theme => ({
             padding: theme.spacing(2),
-        }))} className="">
+        }))} elevation={6}>
             {/* TODO fix spacing */}
             <form autoComplete="off" noValidate style={formStyles} onSubmit={handleSubmit} encType="multipart/form-data" action="/upload">
                 <Typography className="" variant="h6">

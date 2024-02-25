@@ -7,6 +7,7 @@ import { PostType } from "../../../types/post";
 import { useAppDispatch } from "../../../redux/hooks";
 import { setCurrentPostId } from "../../../redux/post/postSlice";
 import { deletePost, getPosts, likePost } from "../../../api";
+import { CSSProperties } from "react";
 
 interface PostProps {
     post: PostType
@@ -18,14 +19,14 @@ const Post: React.FC<PostProps> = ({post}) => {
 
     const dispatch = useAppDispatch();
 
-    const media = {
+    const media: CSSProperties = {
         height: 0,
         paddingTop: '56.25%',
         backgroundColor: 'rgba(0, 0, 0, 0.5)',
         backgroundBlendMode: 'darken',
     }
 
-    const card = {
+    const card: CSSProperties = {
         display: 'flex',
         flexDirection: 'column',
         justifyContent: 'space-between',
