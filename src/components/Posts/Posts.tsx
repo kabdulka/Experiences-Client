@@ -8,9 +8,9 @@ const Posts: React.FC = () => {
 
     const posts = useAppSelector(state => state.postsReducer.data);
     
-    posts?.forEach((post: PostType) => {
-        console.log(post)
-    })
+    // posts?.forEach((post: PostType) => {
+    //     console.log(post)
+    // })
 
     return (
         !posts?.length ? <CircularProgress /> : (

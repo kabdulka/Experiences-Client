@@ -10,6 +10,9 @@ import { updatePost, createPost, getPosts } from "../../api";
 import { setCurrentPostId } from "../../redux/post/postSlice";
 
 const Form: React.FC= () => {
+
+    const user = JSON.parse(localStorage.getItem("profile"));
+    // console.log("Form", user)
     // TODO: add preview for the upload image feature (not dropzone)
     const [preview, setPreview] = useState("");
     const [loading, setLoading] = useState<boolean>(false);
@@ -18,7 +21,7 @@ const Form: React.FC= () => {
     const post = useAppSelector((state) => currentId ? state.postsReducer.data.find((p) => p._id === currentId) : null);
     // const [attachment, setAttachment] = useState<File | string | undefined>();
     const [postData, setPostData] = useState({
-        user: '',
+        // user: '',
         title: '',
         message: '',
         tags: [""],
@@ -87,9 +90,10 @@ const Form: React.FC= () => {
         try {
             setLoading(true);        
             if (!currentId) {
-                await dispatch(createPost(postData));
+                console.log("name of user: ", user?.result?.name)
+                await dispatch(createPost({...postData, name: user?.result?.name}));
             } else {
-                await dispatch(updatePost({updateData: postData, id: currentId}));
+                await dispatch(updatePost({updateData: {...postData, name: user?.result?.name}, id: currentId}));
             }
             await dispatch(getPosts());
 
@@ -112,7 +116,7 @@ const Form: React.FC= () => {
     const clear = (): void => {
         dispatch(setCurrentPostId(null))
         setPostData({
-            user: "",
+            // user: "",
             title: "",
             message: "",
             tags: [""],
@@ -135,6 +139,16 @@ const Form: React.FC= () => {
         }
     };
 
+    if (!user?.name && !user?.result?.name) {
+        return (
+            <Paper sx={(theme => ({
+                padding: theme.spacing(2),
+            }))} elevation={6}>
+                <Typography variant="h6" align="center"> Please sign in to create your own Experiences!</Typography>
+            </Paper>
+        );
+    }
+
     return (
         <Paper sx={(theme => ({
             padding: theme.spacing(2),
@@ -146,14 +160,14 @@ const Form: React.FC= () => {
                         currentId ? `Editing ` : `Creating `
                     } an Experience
                 </Typography>
-                <TextField  
+                {/* <TextField  
                     name="user" 
                     variant="outlined" 
                     label="user" 
                     fullWidth
                     value={postData.user}
                     onChange={handleTextChange}
-                />
+                /> */}
                 <TextField  
                     name="title" 
                     variant="outlined" 

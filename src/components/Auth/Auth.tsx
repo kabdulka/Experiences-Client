@@ -3,11 +3,12 @@ import LockOutlinedIcon from '@mui/icons-material/LockOutlined';
 import { paper, avatarStyle, form, submit, googleButton } from "./styles";
 import { GoogleLogin } from "@react-oauth/google";
 import Input from "./Input";
-import { useState } from "react";
-import { useAppDispatch } from "../../redux/hooks";
+import { useState, useEffect } from "react";
+import { useAppDispatch, useAppSelector } from "../../redux/hooks";
 import { JwtPayload, jwtDecode } from 'jwt-decode';
 import { setAuthData } from "../../redux/auth/authSlice";
 import { useNavigate } from "react-router-dom";
+import { signUp, signIn } from "../../api";
 
 type formDataType = {
     firstName: string,
@@ -18,6 +19,9 @@ type formDataType = {
 }
 
 const Auth = () => {
+
+    const user = useAppSelector((state) => state.authSlice.authData);
+    // const [user, _] = useState(JSON.parse(localStorage.getItem("profile")));
 
     const [showPassword, setShowPassword] = useState<boolean>(false);
     const [isSignup, setIsSignup] = useState<boolean>(false)
@@ -33,14 +37,23 @@ const Auth = () => {
 
     const dispatch = useAppDispatch();
 
+    useEffect(() => {
+        // console.log("User in AUTH", user);
+        if (user) navigate("/");
+    }, [user])
+
     const handleSubmit = (event) => {
         event.preventDefault();
         console.log(formData)
 
         if (isSignup) {
             // dispatch signup
+            dispatch(signUp({formData}));
+            // navigate("/");
         } else {
+            dispatch(signIn({formData}));
             // dispatch signin
+            // navigate("/");
         }
     }
 
@@ -81,14 +94,14 @@ const Auth = () => {
 
         try {
             dispatch(setAuthData(decodedToken));
-            navigate("/")
+            navigate("/");
         } catch (error) {
-
+            console.log(error);
         }
     }
 
     const onError = () => {
-        console.log("login failed")
+        console.log("login failed");
     }
 
     return (

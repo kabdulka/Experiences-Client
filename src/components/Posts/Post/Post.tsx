@@ -1,23 +1,51 @@
 import { Card, Typography, CardActions, CardMedia, Button, CardContent } from "@mui/material";
-import ThumbsUpIcon from '@mui/icons-material/ThumbUpOffAlt';
 import DeleteIcon from '@mui/icons-material/Delete';
 import MoreHorizIcon from '@mui/icons-material/MoreHoriz';
 import moment from "moment";
+// import * as moment from "moment";
 import { PostType } from "../../../types/post";
 import { useAppDispatch } from "../../../redux/hooks";
 import { setCurrentPostId } from "../../../redux/post/postSlice";
 import { deletePost, getPosts, likePost } from "../../../api";
 import { CSSProperties } from "react";
+import { ThumbUpAlt, ThumbUpOffAlt } from "@mui/icons-material";
 
 interface PostProps {
     post: PostType
 }
 
+// TODO check if current user created the post
+
 const Post: React.FC<PostProps> = ({post}) => {
 
-    // console.log(post.file)
-
+    const user = JSON.parse(localStorage.getItem("profile"));
+    
     const dispatch = useAppDispatch();
+
+    console.log(post);
+
+    const Likes = () => {
+        // post has at least 1 like
+        if (post.likes.length > 0) {
+            return post.likes.find((like) => like === (user?.result?.googleId || user?.result?._id)) 
+                ? ( 
+                    <> <ThumbUpAlt fontSize="small"/> &nbsp;{post.likes.length > 2 ? `You and ${post.likes.length-1} others` : `${post.likes.length} like${post.likes.length > 1 ? 's' : ''}`} </> 
+                ) : (
+                    <> <ThumbUpOffAlt fontSize="small" />&nbsp;{post.likes.length} {post.likes.length === 1 ? 'Like' : 'Likes'} </>
+                )
+        }
+
+        return <> <ThumbUpAlt fontSize="small"/> {` Like`} </>
+    }
+
+    const didUserCreatePost = () => {
+        if (user?.result?._id === post?.user) {
+            console.log("user created post");
+            return true;
+        }
+        console.log("user didn't create post");
+        return false
+    }
 
     const media: CSSProperties = {
         height: 0,
@@ -79,19 +107,22 @@ const Post: React.FC<PostProps> = ({post}) => {
         await dispatch(getPosts());
     }
 
-
     return (
         <>
             <Card sx={card}>
                 <CardMedia sx={media} image={typeof post.file === 'string' ? post.file : undefined} title={post.title}/>
                 <div style={overlay}>
-                    <Typography variant="h6"> {post.user} </Typography>
+                    <Typography variant="h6"> {post?.name} </Typography>
                     <Typography variant="body2"> {moment(post.createdAt).fromNow()} </Typography>
                 </div>
                 <div style={overlay2}>
-                    <Button style={{color: "white"}} size="small" onClick={handleEditPost} > 
-                        <MoreHorizIcon sx={{fontSize: "default"}} />
-                    </Button>
+                    {
+                        didUserCreatePost() && (
+                            <Button style={{color: "white"}} size="small" onClick={handleEditPost} > 
+                                <MoreHorizIcon sx={{fontSize: "default"}} />
+                            </Button>
+                        )
+                    }
                 </div>
                 <div style={details}>
                     <Typography variant="body2" color="textSecondary"> 
@@ -105,15 +136,18 @@ const Post: React.FC<PostProps> = ({post}) => {
                     <Typography variant="body2" color="textSecondary" component="p"> { post.message } </Typography>
                 </CardContent>
                 <CardActions sx={cardActions}>
-                    <Button size="small" color="primary" onClick={handleLike}>
-                        <ThumbsUpIcon fontSize="small"/>
-                         &nbsp;
-                        {` Like ${post.likeCount} `}
+                    <Button disabled={!user} size="small" color="primary" onClick={handleLike}>
+                        <Likes />
                     </Button>
-                    <Button size="small" color="primary" onClick={handleDelete}>
-                        <DeleteIcon fontSize="small"/>
-                        Delete
-                    </Button>
+                    {
+                        didUserCreatePost() && 
+                        (
+                            <Button disabled={!didUserCreatePost()} size="small" color="primary" onClick={handleDelete}>
+                                <DeleteIcon fontSize="small"/>
+                                Delete
+                            </Button>
+                        )
+                    }
                 </CardActions>
             </Card>
         </>
