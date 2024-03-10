@@ -1,8 +1,6 @@
 import axios from 'axios';
 import { createAsyncThunk } from '@reduxjs/toolkit';
 import { FormPostType } from '../types/post';
-// import { History } from '@remix-run/router';
-import { useNavigate } from 'react-router-dom';
 
 const url = `http://localhost:5500/posts`;
 
@@ -31,6 +29,11 @@ type formDataType = {
     confirmPassword: string,
 }
 
+type searchQueryType = {
+    tags: string
+    search: string
+}
+
 interface signIn {
     formData: formDataType
 }
@@ -39,9 +42,11 @@ interface signUp {
     formData: formDataType
 }
 
-const getPosts = createAsyncThunk("posts/getPosts", async () => {
+const getPosts = createAsyncThunk("posts/getPosts", async (page: number) => {
+
     try {
-        const response = await API.get(`/posts`);
+        const response = await API.get(`/posts?page=${page}`);
+        console.log(response)
         return response.data
     } catch (error) {
         console.log(error)
@@ -100,7 +105,7 @@ const deletePost = createAsyncThunk("post/deletePost",
             console.log(error)
         }
     }
-)
+);
 
 const likePost = createAsyncThunk("post/likePost", 
     async (id: string) => {
@@ -111,7 +116,19 @@ const likePost = createAsyncThunk("post/likePost",
             console.log(error);
         }
     }
-)
+);
+
+ 
+const searchPosts = createAsyncThunk("post/searchPosts",  async (searchQuery: searchQueryType) => {
+    try {
+        const { data: { data } } = await API.get(`/posts/search?searchQuery=${searchQuery?.search || 'none'}&tags=${searchQuery?.tags}`);
+        console.log(data);
+        return data
+    } catch (error) {
+        console.log(error);
+    }
+})
+
 
 const signIn = createAsyncThunk("auth/signin", 
     async ({formData}: signIn) => {
@@ -143,6 +160,7 @@ const signUp = createAsyncThunk("auth/signup",
 
 export {
     getPosts,
+    searchPosts,
     createPost,
     updatePost,
     deletePost,

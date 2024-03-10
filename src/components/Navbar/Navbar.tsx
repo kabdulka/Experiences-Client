@@ -1,7 +1,8 @@
 import { useState, useEffect } from "react";
-import { StyledAppBar, headingStyle, imgStyle, brandContainer, toolbar, profile, userName } from "./styles";
-import { Avatar, Button, Toolbar, Typography } from "@mui/material";
-import experiences_logo from '../../images/experiences_logo.jpeg';
+import { StyledAppBar, headingStyle, imgStyle, brandContainer, StyledToolBar, profile, userName } from "./styles";
+import { Avatar, Button, Toolbar, Typography, useTheme } from "@mui/material";
+import experiences_text from "../../assets/images/experiences-Text.png";
+import experiences_logo from "../../assets/images/experiences-logo.png";
 import { Link } from 'react-router-dom';
 import { deepPurple } from "@mui/material/colors";
 import { useAppDispatch } from "../../redux/hooks";
@@ -13,6 +14,7 @@ import { jwtDecode, JwtPayload } from "jwt-decode";
 const Navbar: React.FC = () => {
 
     // const user = null;
+    const theme = useTheme();
     const [user, setUser] = useState(JSON.parse(localStorage.getItem("profile")));
     console.log(user)
     const dispatch = useAppDispatch();
@@ -68,17 +70,34 @@ const Navbar: React.FC = () => {
   return (
   
     <StyledAppBar position='static' color="inherit" >
-        <div style={brandContainer}>
+        {/* <div style={brandContainer}> */}
 
-            <Typography sx={headingStyle} component={Link} to="/" variant='h2' align='center'> Experiences </Typography>
-            <img style={imgStyle} src={experiences_logo} alt="Experiences" height="60"/>
+            {/* <Typography sx={headingStyle} component={Link} to="/" variant='h2' align='center'> Experiences </Typography> */}
+            <Link to="/" style={brandContainer}> 
+                <img src={experiences_text} alt="Experiences" height="45px"/>
+                <img style={imgStyle}src={experiences_logo} alt="icon" height="40px" />
+            </Link>
 
-        </div>
+        {/* </div> */}
 
-        <Toolbar sx={toolbar}>
+        <StyledToolBar>
             {
                 user ? (
-                    <div style={profile}>
+                    // <div style={profile}>
+                    <div style={{
+                        display: "flex",
+                        justifyContent: "space-between",
+                        width: "400px",
+                        alignItems: "center",
+                        // flexDirection: theme.breakpoints.up("md") ? 'column' : 'row',
+                        // [theme.breakpoints.down("md")]: {
+                        //     flexDirection: 'column',
+                        //     // width: 'auto',
+                        //     // marginTop: 20,
+                        //     border: "yellow solid 1px",
+                        //     justifyContent: 'center',
+                        // }
+                    }}>
                         <Avatar sx={{
                             color: theme =>  theme.palette.getContrastText(deepPurple[500]),
                                 backgroundColor: deepPurple[500],
@@ -101,6 +120,7 @@ const Navbar: React.FC = () => {
                         <Button 
                             component={Link}
                             to="/auth"
+                            onClick={()=>navigate("/auth")}
                             variant="contained"
                             color="primary"
                         >
@@ -109,7 +129,7 @@ const Navbar: React.FC = () => {
                     </div>
                 )
             }
-        </Toolbar>
+        </StyledToolBar>
         
     </StyledAppBar>
     

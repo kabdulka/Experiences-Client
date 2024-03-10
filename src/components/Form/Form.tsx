@@ -18,7 +18,7 @@ const Form: React.FC= () => {
     const [loading, setLoading] = useState<boolean>(false);
     const dispatch = useAppDispatch();
     const currentId = useAppSelector(state => state.postsReducer.currentPostId);
-    const post = useAppSelector((state) => currentId ? state.postsReducer.data.find((p) => p._id === currentId) : null);
+    const post = useAppSelector((state) => currentId ? state.postsReducer.data.posts.find((p) => p._id === currentId) : null);
     // const [attachment, setAttachment] = useState<File | string | undefined>();
     const [postData, setPostData] = useState({
         // user: '',
@@ -95,7 +95,7 @@ const Form: React.FC= () => {
             } else {
                 await dispatch(updatePost({updateData: {...postData, name: user?.result?.name}, id: currentId}));
             }
-            await dispatch(getPosts());
+            await dispatch(getPosts(1));
 
             // Reset Form
             clear();

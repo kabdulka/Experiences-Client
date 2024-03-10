@@ -1,24 +1,24 @@
 import Post from "./Post/Post";
 import { useAppSelector } from "../../redux/hooks";
-import { CircularProgress } from '@mui/material';
+import { CircularProgress, Typography } from '@mui/material';
 import { Grid } from "@mui/material";
 import { PostType } from "../../types/post";
 
 const Posts: React.FC = () => {
 
-    const posts = useAppSelector(state => state.postsReducer.data);
+    const posts = useAppSelector(state => state.postsReducer.data?.posts);
+    const isLoading = useAppSelector(state => state.postsReducer?.loading);
+    console.log("posts and is loading", posts, isLoading)
     
-    // posts?.forEach((post: PostType) => {
-    //     console.log(post)
-    // })
-
+    if (!posts?.length && !isLoading) {return <Typography variant="h4"> No Posts {`:(`} </Typography>};
+    
     return (
-        !posts?.length ? <CircularProgress /> : (
+        isLoading ? <CircularProgress /> : (
             <Grid container alignItems="stretch" spacing={3}>
                 {
                     posts?.map((post) => (
                        
-                        <Grid key={post._id} item xs={12} sm={6}>
+                        <Grid key={post._id} item xs={12} sm={12} md={6} lg={3}>
                             <Post post={post}/>
                         </Grid>
                     ))

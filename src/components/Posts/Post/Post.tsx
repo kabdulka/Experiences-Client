@@ -1,14 +1,14 @@
-import { Card, Typography, CardActions, CardMedia, Button, CardContent } from "@mui/material";
+import { Card, Typography, CardActions, CardMedia, Button, CardContent, ButtonBase } from "@mui/material";
 import DeleteIcon from '@mui/icons-material/Delete';
 import MoreHorizIcon from '@mui/icons-material/MoreHoriz';
 import moment from "moment";
-// import * as moment from "moment";
 import { PostType } from "../../../types/post";
 import { useAppDispatch } from "../../../redux/hooks";
 import { setCurrentPostId } from "../../../redux/post/postSlice";
 import { deletePost, getPosts, likePost } from "../../../api";
 import { CSSProperties } from "react";
 import { ThumbUpAlt, ThumbUpOffAlt } from "@mui/icons-material";
+import { useNavigate } from "react-router-dom";
 
 interface PostProps {
     post: PostType
@@ -21,6 +21,7 @@ const Post: React.FC<PostProps> = ({post}) => {
     const user = JSON.parse(localStorage.getItem("profile"));
     
     const dispatch = useAppDispatch();
+    const navigate = useNavigate();
 
     console.log(post);
 
@@ -99,42 +100,52 @@ const Post: React.FC<PostProps> = ({post}) => {
 
     const handleLike = async () => {
         await dispatch(likePost(post._id));
-        await dispatch(getPosts());
+        await dispatch(getPosts(1));
     }
 
     const handleDelete = async () => {
         await dispatch(deletePost(post._id));
-        await dispatch(getPosts());
+        await dispatch(getPosts(1));
+    }
+
+    const openCard = () => {
+        navigate(`posts/${post._id}`);
     }
 
     return (
         <>
-            <Card sx={card}>
-                <CardMedia sx={media} image={typeof post.file === 'string' ? post.file : undefined} title={post.title}/>
-                <div style={overlay}>
-                    <Typography variant="h6"> {post?.name} </Typography>
-                    <Typography variant="body2"> {moment(post.createdAt).fromNow()} </Typography>
-                </div>
-                <div style={overlay2}>
-                    {
-                        didUserCreatePost() && (
-                            <Button style={{color: "white"}} size="small" onClick={handleEditPost} > 
-                                <MoreHorizIcon sx={{fontSize: "default"}} />
-                            </Button>
-                        )
-                    }
-                </div>
-                <div style={details}>
-                    <Typography variant="body2" color="textSecondary"> 
+            <Card sx={card} raised elevation={6}>
+                <ButtonBase onClick={openCard} sx={{
+                        display: 'block',
+                        textAlign: 'initial',
+                }}>
+                    
+                    <CardMedia sx={media} image={typeof post.file === 'string' ? post.file : undefined} title={post.title}/>
+                    <div style={overlay}>
+                        <Typography variant="h6"> {post?.name} </Typography>
+                        <Typography variant="body2"> {moment(post.createdAt).fromNow()} </Typography>
+                    </div>
+                    <div style={overlay2}>
                         {
-                            post.tags.filter((tag) =>  tag !== '').map(tag => `#${tag} `)
+                            didUserCreatePost() && (
+                                <Button style={{color: "white"}} size="small" onClick={handleEditPost} > 
+                                    <MoreHorizIcon sx={{fontSize: "default"}} />
+                                </Button>
+                            )
                         }
-                    </Typography>
-                </div>
-                <Typography sx={title} variant="h5" gutterBottom> { post.title } </Typography>
-                <CardContent>
-                    <Typography variant="body2" color="textSecondary" component="p"> { post.message } </Typography>
-                </CardContent>
+                    </div>
+                    <div style={details}>
+                        <Typography variant="body2" color="textSecondary"> 
+                            {
+                                post.tags.filter((tag) =>  tag !== '').map(tag => `#${tag} `)
+                            }
+                        </Typography>
+                    </div>
+                    <Typography sx={title} variant="h5" gutterBottom> { post.title } </Typography>
+                    <CardContent>
+                        <Typography variant="body2" color="textSecondary" component="p"> { post.message } </Typography>
+                    </CardContent>
+                </ButtonBase>
                 <CardActions sx={cardActions}>
                     <Button disabled={!user} size="small" color="primary" onClick={handleLike}>
                         <Likes />
