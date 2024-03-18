@@ -7,7 +7,6 @@ export const paper = (theme: Theme) => ({
     flexDirection: 'column',
     alignItems: 'center',
     padding: theme.spacing(2),
-    border: "red solid 1px"
 });
 
 export const avatarStyle = (theme: Theme) => ({

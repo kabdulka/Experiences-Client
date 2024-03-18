@@ -10,6 +10,7 @@ import { useNavigate } from "react-router-dom";
 import { logout } from "../../redux/auth/authSlice";
 import { useLocation } from "react-router-dom";
 import { jwtDecode, JwtPayload } from "jwt-decode";
+import "./Navbar.scss";
 
 const Navbar: React.FC = () => {
 
@@ -70,34 +71,17 @@ const Navbar: React.FC = () => {
   return (
   
     <StyledAppBar position='static' color="inherit" >
-        {/* <div style={brandContainer}> */}
 
-            {/* <Typography sx={headingStyle} component={Link} to="/" variant='h2' align='center'> Experiences </Typography> */}
-            <Link to="/" style={brandContainer}> 
-                <img src={experiences_text} alt="Experiences" height="45px"/>
-                <img style={imgStyle}src={experiences_logo} alt="icon" height="40px" />
-            </Link>
+        <Link to="/" style={brandContainer}> 
+            <img src={experiences_text} alt="Experiences" height="45px"/>
+            <img style={imgStyle}src={experiences_logo} alt="icon" height="40px" />
+        </Link>
 
-        {/* </div> */}
 
         <StyledToolBar>
             {
                 user ? (
-                    // <div style={profile}>
-                    <div style={{
-                        display: "flex",
-                        justifyContent: "space-between",
-                        width: "400px",
-                        alignItems: "center",
-                        // flexDirection: theme.breakpoints.up("md") ? 'column' : 'row',
-                        // [theme.breakpoints.down("md")]: {
-                        //     flexDirection: 'column',
-                        //     // width: 'auto',
-                        //     // marginTop: 20,
-                        //     border: "yellow solid 1px",
-                        //     justifyContent: 'center',
-                        // }
-                    }}>
+                    <div className="profile">
                         <Avatar sx={{
                             color: theme =>  theme.palette.getContrastText(deepPurple[500]),
                                 backgroundColor: deepPurple[500],

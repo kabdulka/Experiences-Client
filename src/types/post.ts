@@ -7,6 +7,7 @@ type FormPostType = {
     message: string,
     tags: string[],
     file:  File | string | undefined,
+    likes?: string[],
 }
 
 type PostType = {
@@ -17,7 +18,7 @@ type PostType = {
     name: string,
     tags: string[],
     file: File |  string | undefined,
-    likes: string[],
+    likes?: string[],
     createdAt: Date,
 }
 

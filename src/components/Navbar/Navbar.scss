@@ -1,0 +1,25 @@
+
+
+@use '../../styles/partials/mixins.scss' as *;
+@use '../../styles/partials/variables.scss' as *;
+
+.profile {
+
+    display: flex;
+    flex-direction: column;
+    width: auto;
+    justify-content: center;
+    align-items: center;
+    // margin-top: 1.25rem;
+    gap: 0.25rem;
+    margin-top: 1.25rem;
+
+    @include medium-screen {
+        flex-direction: row;
+        width: 25rem;
+        align-items: center;
+        justify-content: space-between;
+        margin-top: 0;
+    }
+
+}

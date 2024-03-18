@@ -11,7 +11,7 @@ export const StyledAppBar = styled(AppBar)<AppBarProps>(({ theme }) => ({
     justifyContent: 'space-between',
     alignItems: 'center',
     padding: '10px 50px',
-    [theme.breakpoints.down('sm')]: {
+    [theme.breakpoints.down('md')]: {
         flexDirection: 'column',
       },
 }));
@@ -26,6 +26,7 @@ export const headingStyle = {
     textDecoration: 'none',
     fontSize: '2em',
     fontWeight: 300,
+    // backgroundColor: "red"
 };
 
 export const brandContainer = {
@@ -36,25 +37,28 @@ export const brandContainer = {
 };
 
 export const StyledToolBar = styled(Toolbar)<ToolbarProps>(({ theme }) => ({
-    display: 'flex',
+    // display: 'flex',
     // border: "blue solid 1px",
-    justifyContent: 'flex-end',
-    width: '400px',
-    [theme.breakpoints.down('md')]: {
-        // flexDirection: 'column',
-        // border: "red solid 1px",
-        width: 'auto',
-        display: 'flex',
-      },
+    // justifyContent: 'flex-end',
+    // width: '25rem',
+    // [theme.breakpoints.down('md')]: {
+    //     flexDirection: 'column',
+    //     // border: "red solid 1px",
+    //     width: 'auto',
+    //     // display: 'flex',
+        
+    //   },
 }))
 
 export const profile = {
-    display: 'flex',
-    justifyContent: 'space-between',
-    width: '400px',
+    // display: 'flex',
+    // justifyContent: 'space-between',
+    // width: '25rem',
 }
 
 export const userName = {
+    // border: "red solid 1px",
+    height: "100%",
     display: 'flex',
     alignItems: 'center',
     textAlign: 'center',

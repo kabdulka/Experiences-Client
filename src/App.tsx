@@ -1,8 +1,6 @@
 
 import './App.scss'
 import { Container } from '@mui/material';
-
-// import { StyledAppBar, imgStyle, headingStyle } from './styles';
 import Navbar from './components/Navbar/Navbar';
 import { BrowserRouter, Route, Routes, Navigate } from 'react-router-dom';
 import Home from './pages/Home/Home';
@@ -22,7 +20,7 @@ const App: React.FC = () => {
           <Route path='/posts' element= {<Home/>} />
           <Route path='/posts/search' element= {<Home/>} />
           <Route path='/posts/:id' element= {<PostDetails/>} />
-          <Route path="/auth" element={ !user ? <Auth/> : <Navigate to="/"/> }/>
+          <Route path="/auth" element={  <Auth/> }/>
         </Routes>
       </Container>
     </BrowserRouter>

@@ -46,6 +46,7 @@ const Home: React.FC = () => {
          dispatch(searchPosts({search, tags: tags.join(",")}));
          navigate(`/posts/search?searchQuery=${search || 'none'}&tags=${tags.join(",")}`);
       } else {
+        console.log("ami I here?")
         navigate("/");
       }
     }
@@ -58,15 +59,6 @@ const Home: React.FC = () => {
         },
       }}>
         <Grid
-          // sx={{
-          //   // TODO fix responsiveness
-          //   [theme.breakpoints.down("sm")]: {
-          //     flexDirection: "column-reverse",
-          //   },
-          //   [theme.breakpoints.down("md")]: {
-          //     flexDirection: "column-reverse",
-          //   },
-          // }}
           container
           justifyContent="space-between"
           alignItems="stretch"

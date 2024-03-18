@@ -3,54 +3,97 @@ import DeleteIcon from '@mui/icons-material/Delete';
 import MoreHorizIcon from '@mui/icons-material/MoreHoriz';
 import moment from "moment";
 import { PostType } from "../../../types/post";
-import { useAppDispatch } from "../../../redux/hooks";
+import { useAppDispatch, useAppSelector } from "../../../redux/hooks";
 import { setCurrentPostId } from "../../../redux/post/postSlice";
-import { deletePost, getPosts, likePost } from "../../../api";
-import { CSSProperties } from "react";
+import { deletePost, getPosts, likePost, updatePost } from "../../../api";
+import { CSSProperties, useEffect } from "react";
 import { ThumbUpAlt, ThumbUpOffAlt } from "@mui/icons-material";
 import { useNavigate } from "react-router-dom";
+import { useState } from "react";
 
 interface PostProps {
     post: PostType
 }
 
-// TODO check if current user created the post
-
 const Post: React.FC<PostProps> = ({post}) => {
 
     const user = JSON.parse(localStorage.getItem("profile"));
-    
+    console.log("render");
     const dispatch = useAppDispatch();
     const navigate = useNavigate();
 
-    console.log(post);
+    // const posts = useAppSelector((state) => state.postsReducer.data.posts);
 
-    const Likes = () => {
-        // post has at least 1 like
-        if (post.likes.length > 0) {
-            return post.likes.find((like) => like === (user?.result?.googleId || user?.result?._id)) 
-                ? ( 
-                    <> <ThumbUpAlt fontSize="small"/> &nbsp;{post.likes.length > 2 ? `You and ${post.likes.length-1} others` : `${post.likes.length} like${post.likes.length > 1 ? 's' : ''}`} </> 
-                ) : (
-                    <> <ThumbUpOffAlt fontSize="small" />&nbsp;{post.likes.length} {post.likes.length === 1 ? 'Like' : 'Likes'} </>
-                )
+    console.log("post.likes:", post?.likes)
+    const [likes, setLikes] = useState<string[]>(post?.likes);
+    console.log("likes", likes);
+    // const liked = post.likes.includes(user?.result?._id);
+
+    const userId = user?.result?._id;
+
+    const handleLike = async () => {
+        try {
+            if (!user) {
+                // User is not logged in, handle accordingly
+                return;
+            }
+    
+            // Check if the user has already liked the post
+            const hasLikedPost = likes.includes(user?.result?._id);
+    
+            let updatedLikes;
+    
+            if (hasLikedPost) {
+                // If the user has already liked the post, remove their like
+                updatedLikes = likes.filter((id) => id !== user?.result?._id);
+            } else {
+                // If the user hasn't liked the post, add their like
+                updatedLikes = [...likes, user?.result?._id];
+            }
+    
+            // Update the local state with the new likes
+            setLikes(updatedLikes);
+    
+            // Dispatch an action to update the post with the new likes
+            await dispatch(updatePost({ updateData: { ...post, likes: updatedLikes }, id: post._id }));
+        } catch (error) {
+            console.error("Error handling like:", error);
+            // Handle error if needed
         }
+    };
 
-        return <> <ThumbUpAlt fontSize="small"/> {` Like`} </>
+    const handleDelete2 = async () => {
+
     }
 
+    // useEffect(() => {
+    //     console.log("Updated likes:", likes);
+    // }, [likes]);
+
+    const Likes = () => {
+        if (likes.length > 0) {
+            console.log("inslide function", likes)
+          return likes.find((like) => like === userId)
+            ? (
+              <><ThumbUpAlt fontSize="small" />&nbsp;{likes.length > 2 ? `You and ${likes.length - 1} others` : `${likes.length} like${likes.length > 1 ? 's' : ''}` }</>
+            ) : (
+              <><ThumbUpOffAlt fontSize="small" />&nbsp;{likes.length} {likes.length === 1 ? 'Like' : 'Likes'}</>
+            );
+        }
+    
+        return <><ThumbUpOffAlt fontSize="small" />&nbsp;Like</>;
+    };
+
     const didUserCreatePost = () => {
-        if (user?.result?._id === post?.user) {
-            console.log("user created post");
+        if (userId === post?.user) {
             return true;
         }
-        console.log("user didn't create post");
         return false
     }
 
     const media: CSSProperties = {
         height: 0,
-        paddingTop: '56.25%',
+        paddingTop: '75.25%',
         backgroundColor: 'rgba(0, 0, 0, 0.5)',
         backgroundBlendMode: 'darken',
     }
@@ -59,7 +102,7 @@ const Post: React.FC<PostProps> = ({post}) => {
         display: 'flex',
         flexDirection: 'column',
         justifyContent: 'space-between',
-        borderRadius: '15px',
+        borderRadius: '1rem',
         height: '100%',
         position: 'relative',
     }
@@ -94,22 +137,24 @@ const Post: React.FC<PostProps> = ({post}) => {
         justifyContent: 'space-between',
     }
 
-    const handleEditPost = () => {
+    const handleEditPost = (event) => {
+        event.stopPropagation();
         dispatch(setCurrentPostId(post._id));
-    }
-
-    const handleLike = async () => {
-        await dispatch(likePost(post._id));
-        await dispatch(getPosts(1));
+        // dispatch(getPosts(1));
     }
 
     const handleDelete = async () => {
-        await dispatch(deletePost(post._id));
-        await dispatch(getPosts(1));
+        try {
+
+            await dispatch(deletePost(post._id));
+        } catch(error) {
+            console.error('Error deleting post:', error);
+
+        }
     }
 
     const openCard = () => {
-        navigate(`posts/${post._id}`);
+        navigate(`/posts/${post._id}`);
     }
 
     return (
@@ -122,7 +167,7 @@ const Post: React.FC<PostProps> = ({post}) => {
                     
                     <CardMedia sx={media} image={typeof post.file === 'string' ? post.file : undefined} title={post.title}/>
                     <div style={overlay}>
-                        <Typography variant="h6"> {post?.name} </Typography>
+                        <Typography variant="body2"> {post?.name} </Typography>
                         <Typography variant="body2"> {moment(post.createdAt).fromNow()} </Typography>
                     </div>
                     <div style={overlay2}>
@@ -143,17 +188,19 @@ const Post: React.FC<PostProps> = ({post}) => {
                     </div>
                     <Typography sx={title} variant="h5" gutterBottom> { post.title } </Typography>
                     <CardContent>
-                        <Typography variant="body2" color="textSecondary" component="p"> { post.message } </Typography>
+                        <Typography variant="body2" color="textSecondary" component="p">  {post.message.split(' ').splice(0, 20).join(' ')}...  </Typography>
                     </CardContent>
                 </ButtonBase>
                 <CardActions sx={cardActions}>
                     <Button disabled={!user} size="small" color="primary" onClick={handleLike}>
                         <Likes />
+                        {/* {liked ? `${post.likes.length + 1} Likes` : `${post.likes.length} Likes`} */}
+
                     </Button>
                     {
                         didUserCreatePost() && 
                         (
-                            <Button disabled={!didUserCreatePost()} size="small" color="primary" onClick={handleDelete}>
+                            <Button disabled={!didUserCreatePost()} size="small" color="secondary" onClick={handleDelete}>
                                 <DeleteIcon fontSize="small"/>
                                 Delete
                             </Button>

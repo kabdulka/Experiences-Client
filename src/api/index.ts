@@ -16,6 +16,11 @@ API.interceptors.request.use((req) => {
     return req; // return this request to make future requests
 });
 
+interface CreatePostPayload {
+    postData: FormPostType;
+    navigate: Function; // Add navigate as an argument
+  }
+
 interface UpdatePostPayload {
     updateData: FormPostType;
     id: string;
@@ -53,13 +58,26 @@ const getPosts = createAsyncThunk("posts/getPosts", async (page: number) => {
     }
 })
 
+const getPost = createAsyncThunk("posts/getPost", async(id: string) => {
+    try {
+        console.log(id)
+        const response = await API.get(`/posts/${id}`);
+        console.log("get post", response.data)
+        return response.data;
+    } catch (error) {
+        console.log(error);
+    }
+})
+
 const createPost = createAsyncThunk("posts/sendPost", 
     // async (postData: FormPostType) => {
-    async (postData: FormPostType) => {
+    async ({ postData, navigate }: CreatePostPayload) => {
+    
     try {
         console.log("postData", postData)
         const response = await API.post(`/posts`, postData);
-
+        console.log(response.data)
+        navigate(`/posts/${response.data._id}`);
         return response.data
     } catch (error) {
         console.log(error)
@@ -100,7 +118,8 @@ const deletePost = createAsyncThunk("post/deletePost",
     async (id: string) => {
         try {
             const response = await API.delete(`${url}/${id}`);
-            return response.data;
+            console.log("inside delete post index.ts", response.data)
+            return id;
         } catch (error) {
             console.log(error)
         }
@@ -109,8 +128,9 @@ const deletePost = createAsyncThunk("post/deletePost",
 
 const likePost = createAsyncThunk("post/likePost", 
     async (id: string) => {
-        try {
+        try {            
             const response = await API.patch(`${url}/${id}/like`);
+            console.log("likepost", response.data);
             return response.data;
         } catch (error) {
             console.log(error);
@@ -118,12 +138,14 @@ const likePost = createAsyncThunk("post/likePost",
     }
 );
 
- 
 const searchPosts = createAsyncThunk("post/searchPosts",  async (searchQuery: searchQueryType) => {
     try {
-        const { data: { data } } = await API.get(`/posts/search?searchQuery=${searchQuery?.search || 'none'}&tags=${searchQuery?.tags}`);
-        console.log(data);
-        return data
+        console.log("searchQuery", searchQuery)
+        
+        const response = await API.get(`/posts/search?searchQuery=${searchQuery?.search || 'none'}&tags=${searchQuery?.tags}`);
+        console.log("Search posts", response);
+        // return response.data;
+        return response.data;
     } catch (error) {
         console.log(error);
     }
@@ -160,6 +182,7 @@ const signUp = createAsyncThunk("auth/signup",
 
 export {
     getPosts,
+    getPost,
     searchPosts,
     createPost,
     updatePost,

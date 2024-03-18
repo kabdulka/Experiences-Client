@@ -1,13 +1,12 @@
 import { TextField, Button, Typography, Paper, CircularProgress } from "@mui/material";
 import './form.scss'
 import CloseIcon from '@mui/icons-material/Close';
-// import AttachFileIcon from '@mui/icons-material/AttachFile';
 import { useState, useEffect } from "react";
 // import {useDropzone} from 'react-dropzone'
 import { useAppDispatch, useAppSelector } from "../../redux/hooks";
 import { updatePost, createPost, getPosts } from "../../api";
-// import { FormPostType } from "../../types/post";
 import { setCurrentPostId } from "../../redux/post/postSlice";
+import { useLocation, useNavigate } from "react-router-dom";
 
 const Form: React.FC= () => {
 
@@ -19,7 +18,15 @@ const Form: React.FC= () => {
     const dispatch = useAppDispatch();
     const currentId = useAppSelector(state => state.postsReducer.currentPostId);
     const post = useAppSelector((state) => currentId ? state.postsReducer.data.posts.find((p) => p._id === currentId) : null);
-    // const [attachment, setAttachment] = useState<File | string | undefined>();
+    
+    const location = useLocation();
+    const queryString = location.search;
+    const urlParams = new URLSearchParams(queryString);
+    const page = Number(urlParams.get('page'));
+    console.log("PAGE:", page)
+
+    const navigate = useNavigate()
+    
     const [postData, setPostData] = useState({
         // user: '',
         title: '',
@@ -28,34 +35,13 @@ const Form: React.FC= () => {
         file: null,
     });
 
-    console.log(currentId, " Form.tsx");
+    // console.log(currentId, " Form.tsx");
 
     useEffect(() => {
         if (post) {
             setPostData(post);
         }
     }, [post])
-
-    // const onDrop = useCallback ((acceptedFiles: File[]) => {
-
-    //     if (acceptedFiles.length > 0) {
-    //         const file = acceptedFiles[0];
-    //         console.log(acceptedFiles);
-    //         setPostData({...postData, file: file})
-
-    //         // create a preview URL for the dropped file
-    //         const previewURL = URL.createObjectURL(file);
-    //         setPreview(previewURL);
-    //     }
-    // }, [postData]);
-
-    // const {getRootProps, getInputProps, open, isDragActive} = useDropzone({
-    //     // accept: '.jpeg, .jpg, .png',
-    //     multiple: false,
-    //     noClick: true,
-    //     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    //     onDrop: onDrop as any
-    // });
 
     const formStyles: React.CSSProperties = {
         display: 'flex',
@@ -71,10 +57,7 @@ const Form: React.FC= () => {
         if (name === "tags") {
             
             const trimmedTags = e.target.value.trim().split(",");
-
-            
             setPostData({...postData, [name]: trimmedTags})
-            // console.log("tags")
         } else {
 
             setPostData({...postData, [name]: e.target.value})
@@ -91,11 +74,11 @@ const Form: React.FC= () => {
             setLoading(true);        
             if (!currentId) {
                 console.log("name of user: ", user?.result?.name)
-                await dispatch(createPost({...postData, name: user?.result?.name}));
+                await dispatch(createPost({postData: {...postData, name: user?.result?.name}, navigate}));
             } else {
                 await dispatch(updatePost({updateData: {...postData, name: user?.result?.name}, id: currentId}));
+                await dispatch(getPosts(page));
             }
-            await dispatch(getPosts(1));
 
             // Reset Form
             clear();
@@ -160,14 +143,6 @@ const Form: React.FC= () => {
                         currentId ? `Editing ` : `Creating `
                     } an Experience
                 </Typography>
-                {/* <TextField  
-                    name="user" 
-                    variant="outlined" 
-                    label="user" 
-                    fullWidth
-                    value={postData.user}
-                    onChange={handleTextChange}
-                /> */}
                 <TextField  
                     name="title" 
                     variant="outlined" 
@@ -192,7 +167,6 @@ const Form: React.FC= () => {
                     value={postData.tags}
                     onChange={handleTextChange}
                 />
-                {/* TODO make input show preview */}
                 <input style={{width: "100%"}} type="file" accept="image/*" onChange={handleFileChange} />
 
                 {/* <div> */}
@@ -214,24 +188,6 @@ const Form: React.FC= () => {
                             </div>
                         )
                     }
-                    {/* <div className="message-form-icons">
-                
-                        <div {...getRootProps()}>              
-                            <input {...getInputProps()} type="file" name="file" onChange={handleFileChange}/>
-                            <div className="dropzone-content__container">
-
-                            <AttachFileIcon
-                                className="message-form-icon-clip"
-                                onClick={open}
-                            />
-                            {
-                                isDragActive ? (
-                                    <p className="dropzone-content"> Drop the files here ... </p> ):(
-                                    <p className="dropzone-content">Drag and drop the files here, or click to select files </p> )
-                            }        
-                            </div>
-                        </div>
-                    </div> */}
                 {/* </div> */}
                 {loading && <CircularProgress />}
                 <Button
